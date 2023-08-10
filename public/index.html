@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Data Display</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <button id="controlButtonOn">On</button>
+  <button id="controlButtonOff">Off</button>
+  <h1>Data Display</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>Humidity</th>
+        <th>Temperature</th>
+      </tr>
+    </thead>
+    <tbody id="dataBody">
+    </tbody>
+  </table>
+
+  <script>
+    async function fetchData() {
+      const response = await fetch('/api/data');
+      const data = await response.json();
+
+      const dataBody = document.getElementById('dataBody');
+      dataBody.innerHTML = '';
+
+      data.forEach(entry => {
+        const row = document.createElement('tr');
+
+        const timeCell = document.createElement('td');
+        timeCell.textContent = entry.timestamp;
+
+        const humidityCell = document.createElement('td');
+        humidityCell.textContent = entry.humidity;
+
+        const temperatureCell = document.createElement('td');
+        temperatureCell.textContent = entry.temperature;
+
+        row.appendChild(timeCell);
+        row.appendChild(humidityCell);
+        row.appendChild(temperatureCell);
+
+        dataBody.appendChild(row);
+      });
+    }
+
+    setInterval(() => { fetchData() }, 60000);
+
+    const controlButtonOn = document.getElementById('controlButtonOn');
+    const controlButtonOff = document.getElementById('controlButtonOff');
+    controlButtonOn.addEventListener('click', async () => {
+      try {
+        const response = await fetch('/api/control', {
+          method: 'POST',
+          body: JSON.stringify({ value: 1 }), 
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          console.log('Control signal sent successfully');
+        } else {
+          console.error('Error sending control signal');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    });
+    controlButtonOff.addEventListener('click', async () => {
+      try {
+        const response = await fetch('/api/control', {
+          method: 'POST',
+          body: JSON.stringify({ value: 0 }), 
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          console.log('Control signal sent successfully');
+        } else {
+          console.error('Error sending control signal');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    });
+  </script>
+</body>
+
+</html>
